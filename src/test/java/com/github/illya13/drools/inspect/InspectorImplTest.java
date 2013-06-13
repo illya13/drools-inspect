@@ -20,6 +20,7 @@ import java.util.GregorianCalendar;
 public class InspectorImplTest {
     private Inspector inspector;
     private StatefulKnowledgeSession ksession;
+    private TradeDate tomorrow;
 
     @Before
     public void before() throws Exception {
@@ -41,6 +42,15 @@ public class InspectorImplTest {
         Assert.assertNotNull(inspector.getNodeInfo(1));
         Assert.assertNotNull(inspector.getNodeRules(1));
         Assert.assertNotNull(inspector.getVisitingLog());
+
+        ksession.insert(tomorrow);
+        ksession.fireAllRules();
+        inspector.refresh();
+        Assert.assertNotNull(inspector.getNodeInfos());
+        Assert.assertNotNull(inspector.getNodeInfo(1));
+        Assert.assertNotNull(inspector.getNodeRules(1));
+        Assert.assertNotNull(inspector.getVisitingLog());
+
     }
 
 
@@ -68,7 +78,7 @@ public class InspectorImplTest {
         yesterday.setDate(calendar.getTime());
 
         // tomorrow
-        TradeDate tomorrow = new TradeDate();
+        tomorrow = new TradeDate();
         calendar.setTime(today.getDate());
         calendar.add(Calendar.DAY_OF_MONTH, 1);
         tomorrow.setDate(calendar.getTime());
