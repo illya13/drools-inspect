@@ -1,0 +1,57 @@
+package com.github.illya13.drools.inspect
+
+rule "CleanTradeDates"
+	when
+		$tradeDate1: TradeDate()
+		$lessTradeDate2: TradeDate(date < $tradeDate1.date)
+	then
+		System.out.println("RULE<CleanTradeDates>: " + $lessTradeDate2);
+		retract($lessTradeDate2);
+end
+
+rule "CleanTrades"
+	when
+		$tradeDate: TradeDate(  )
+		$trade: Trade( valueDate == $tradeDate ) 
+	then
+		System.out.println("RULE<CleanTrades>: " + $trade);
+		retract($trade);
+end
+
+rule "CleanTradeStatuses"
+	when
+		$tradeDate: TradeDate(  )
+		$tradeStatus: TradeStatus( valueDate == $tradeDate ) 
+	then
+		System.out.println("RULE<CleanTradeStatuses>: " + $tradeStatus);
+		retract($tradeStatus);
+end
+
+rule "DuplicateTrades"
+	when
+		$trade: Trade()
+		$duplicateTrade: Trade($trade != $duplicateTrade && id == $trade.id && source == $trade.Source)
+	then
+		System.out.println("duplicate " + $duplicateTrade);
+		retract($duplicateTrade);
+end
+
+rule "MatchTrades"
+	when
+		$ticsTrade: Trade(source == Source.TICS)
+		$matchedMorTrade: Trade(source == Source.MOR && id == $ticsTrade.id)
+	then
+		System.out.println("match " + $matchedMorTrade);
+		retract($matchedMorTrade);
+end
+
+rule "UpdateStatus"
+	when
+		$trade: Trade()
+		$tradeStatus: TradeStatus(trade == null && id == $trade.id)
+	then
+		System.out.println("match " + $trade + " and " + $tradeStatus);
+		modify($tradeStatus) {
+			setTrade($trade);
+		}
+end
